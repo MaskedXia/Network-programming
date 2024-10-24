@@ -1,0 +1,46 @@
+查看能够打开最大文件数
+cat /proc/sys/fs/file-max
+
+当前进程默认打开文件数，默认1024
+ulimit -a
+
+vim /etc/security/limits.conf
+
+* soft  nofile 65536    # 设置默认值，可直接命令修改，再注销用户生效
+* hard  nofile 100000   # 设置修改上限
+
+ulimit -n 2000
+
+int epoll_create(int size);
+size：创建红黑树的监听节点数量 （仅供内核参考）
+返回值：指向新创建的红黑树根节点；-1error
+
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+epfd：epoll_create返回值
+op：操作
+EPOLL_CTL_ADD 添加fd
+EPOLL_CTL_MOD 修改fd
+EPOLL_CTL_DEL 删除fd，取消监听
+fd：待监听fd
+event：epoll_event 结构体
+
+typedef union epoll_data {
+void *ptr;
+int fd; //对应监听事件fd
+uint32_t u32;
+uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event {
+uint32_t events; // 事件EPOLLIN、EPOLLOUT…
+epoll_data_t data; //联合体
+};
+返回值：0成功，-1error
+
+int epoll_wait(int epfd, struct epoll_event *events,
+int maxevents, int timeout);
+epfd：epoll_create返回值
+events：数组，传出参数，满足监听条件的fd
+maxevents：数组元素的总个数
+timeout：-1阻塞等待；0不阻塞；>0超时时长，毫秒
+返回值：>0满足监听的总个数，可以用作循环上限；0没有满足事件；-1error

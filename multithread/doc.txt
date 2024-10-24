@@ -1,0 +1,13 @@
+2MSL：保证最后一个ACK能被对端成功接收（等待期间，对端没收到我发的ACK，会继续发FIN）
+
+端口复用(端口可重复使用)
+int opt = 1; //端口复用
+setsocketopt(lfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+半关闭：
+close(cfd); 采用引用计数减一
+或者
+shutdown(int fd, int how); 采用全关闭
+how : SHUT_RD: 关读端
+how : SHUT_WD: 关写端
+how : SHUT_RDWR：关读写端

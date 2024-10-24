@@ -1,0 +1,16 @@
+int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
+fds：监听文件描述符【数组】
+struct pollfd {
+int fd; // 待监听的文件描述符
+short events; // 待监听的文件描述符对应的监听事件 POLLIN、POLLOUT、POLLERR
+short revents; //传入0，满足事件返回非0
+};
+nfds：实际有效监听个数
+timeout：-1阻塞等待；0不阻塞；>0超时时长，毫秒
+返回值：返回对于监听事件文件描述符总个数
+
+优点：自带数组结构，可以将监听事件和返回事件分离
+拓展 监听上限，超出1024上限
+缺点：不能跨平台 Linux
+无法直接定位满足事件的文件描述符，编码难度大

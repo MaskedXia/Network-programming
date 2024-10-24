@@ -1,0 +1,18 @@
+int select(int nfds, fd_set *readfds, fd_set *writefds,
+fd_set *exceptfds, struct timeval *timeout);
+
+nfds：最大文件描述符+1
+readfds、writefds、exceptfds：传入传出参数；读、写、异常
+timeout：NULL永久等待，阻塞；0立即返回，轮询；>0timeout时间内阻塞
+返回值：>0 所有监听集合中，满足对应事件的总数
+0：没有满足的文件描述符
+-1：error
+
+void FD_CLR(int fd, fd_set *set); //对应位置清空
+int FD_ISSET(int fd, fd_set *set); //判断是否置位
+void FD_SET(int fd, fd_set *set); //对应位置置一
+void FD_ZERO(fd_set *set); //全部清空
+
+缺点：监听上限受最大文件描述符限制，最大1024
+检测满足条件的fd，自己添加业务逻辑提高小。提高编码难度
+优点：跨平台
