@@ -3,8 +3,8 @@ int poll(struct pollfd *fds, nfds_t nfds, int timeout);
 fds：监听文件描述符【数组】
 struct pollfd {
 int fd; // 待监听的文件描述符
-short events; // 待监听的文件描述符对应的监听事件 POLLIN、POLLOUT、POLLERR
-short revents; //传入0，满足事件返回非0
+    short events; // 待监听的文件描述符对应的监听事件 POLLIN、POLLOUT、POLLERR
+    short revents; //传入0，满足事件返回非0
 };
 nfds：实际有效监听个数
 timeout：-1阻塞等待；0不阻塞；>0超时时长，毫秒

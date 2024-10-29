@@ -1,0 +1,23 @@
+reactor 以epoll为例
+
+epoll 反应堆模型
+
+epoll ET模式 + 非阻塞 + void *ptr
+
+联合体
+typedef union epoll_data {
+    void *ptr;
+    int fd; //对应监听事件fd
+    uint32_t u32;
+    uint64_t u64;
+} epoll_data_t;
+
+不但需要监听cfd的读事件，还有写事件
+
+
+read ---- recv
+write ---- send
+
+
+lfd -> acceptconn   
+cfd -> recvdata
