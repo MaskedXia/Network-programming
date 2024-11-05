@@ -1,0 +1,37 @@
+TCP : 面向连接的，可靠的数据包传输。 对于不稳定网络层，采取完全弥补的通信方式， 丢包重传
+    优点：稳定 （数据流量稳定、速度稳定、顺序）
+    缺点：传输速度漫，开销大
+    场景：完整性要求高，不追求效率。大数据传输、文件传输
+
+UDP : 无连接的，不可靠的数据报传输。完全不弥补，默认还原网络状况  
+    优点：传输速度快，开销小
+    缺点：不稳定
+    场景：对时效性要求，游戏、视频会议、视频电话
+    （应用层数据校验协议，弥补udp的不足）
+
+
+recvfrom 替换 read
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                    struct sockaddr *src_addr, socklen_t *addrlen);
+sockfd: 套接字
+buf: 缓存区地址
+len: 缓存区大小
+flags: 0
+src_addr: 对端地址结构
+addrlen: 传入传出
+
+返回值： 成功接收数据字节数 失败 -1 ，对端关闭 0
+
+
+sendto 替换 write
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+                      const struct sockaddr *dest_addr, socklen_t addrlen);
+sockfd: 套接字
+buf: 存储缓存区地址
+len: 缓存区大小
+flags: 0
+dest_addr: 对端地址结构
+addrlen: 地址结构长度
+
+返回值： 成功写入数据字节数 失败 -1 
+

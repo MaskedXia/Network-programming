@@ -18,14 +18,12 @@ void sys_err(const char* str)
 
 int main(int argc, char* argv[])
 {
-
-    int ret;
     char buf[BUFSIZ];
     char client_ip[INET_ADDRSTRLEN];
 
-    int lfd = 0, cfd = 0;
+    int lfd = 0, n;
 
-    lfd = socket(AF_INET, SOCK_STREAM, 0);
+    lfd = socket(AF_INET, SOCK_DGRAM, 0);  // SOCK_DGRAM UDP
     if (lfd == -1) {
         sys_err("socket error");
     }
@@ -39,34 +37,32 @@ int main(int argc, char* argv[])
 
     bind(lfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 
-    listen(lfd, 128);
-
-    clit_addr_len = sizeof(clit_addr);
-    cfd = accept(lfd, (struct sockaddr*)&clit_addr, &clit_addr_len);
-    if (cfd == -1) {
-        sys_err("accept error");
-    }
-    
-	printf("client ip:%s port:%d \n",
-        inet_ntop(AF_INET, &clit_addr.sin_addr.s_addr, client_ip, sizeof(client_ip)),
-        ntohs(clit_addr.sin_port));
-
+    printf("Accepting connnections ...\n");
     while (1)
     {
-        ret = read(cfd, buf, sizeof(buf));
-        write(STDOUT_FILENO, buf, ret);
+        clit_addr_len = sizeof(clit_addr);
+        n = recvfrom(lfd, buf, BUFSIZ, 0, (struct sockaddr*)&clit_addr, &clit_addr_len); 
+        if (n == -1) 
+        {
+            sys_err("recvfrom error");
+        }
+        printf("client ip:%s port:%d \n",
+            inet_ntop(AF_INET, &clit_addr.sin_addr.s_addr, client_ip, sizeof(client_ip)),
+            ntohs(clit_addr.sin_port));
 
-        for (int i = 0; i < ret; i++)
+        for (int i = 0; i < n; i++)
         {
             buf[i] = toupper(buf[i]);
         }
 
-        write(cfd, buf, ret);
+        n = sendto(lfd, buf, n, 0, (struct sockaddr*)&clit_addr, clit_addr_len);
+        if (n == -1) 
+        {
+            sys_err("sendto error");
+        }
 
     }
 
     close(lfd);
-    close(cfd);
-
     return 0;
 }
