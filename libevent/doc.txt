@@ -1,0 +1,156 @@
+libevent库
+    开源，精简，跨平台（windows linux maxos unix）专注网络通信
+    支持全双工，半关闭
+
+解压
+tar zxvf libevent-2.1.12-stable.tar.gz
+
+./configure 检查安装环境，生成makefile
+make 生成.o和可执行文件
+sudo make install 将必要的资源拷贝置系统指定目录
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+特性：基于事件异步通信模型 --回调
+
+libevent框架
+    创建 event_base
+        struct event_base * event_base_new(void);
+        struct event_base *base = event_base_new(void);
+    创建事件 event
+        常规事件 event -> event_new();
+        缓冲区事件 bufferevent -> bufferevent_socket_new();
+    将事件添加到base
+        int event_add(struct event *ev, const struct timeval *tv);
+    循环监听事件满足
+        int event_base_dispatch(struct event_base* base);
+        event_base_dispatch(base);
+    释放 event_base
+        event_base_free(base);
+
+
+创建事件：
+    [1]struct event *event_new(struct event_base *base, evutil_socket_t fd, short what, event_callbak_fn cb, void *arg)
+
+    base: event_base_new()返回值
+    fd: 绑定的event文件描述符
+    what: 对应的事件（r，w，e）
+        EV_READ
+        EV_WRITE
+        EV_PERSIST 持续触发，结合event_base_dispatch使用生效
+    cb: 事件满足监听条件，回调函数
+    arg: 回调函数的参数
+    返回值: 成功创建的event
+
+
+    [2]struct event *bufferevent_socket_new(struct event_base *base, evutil_socket_t fd, short what, enum bufferevent_options options)
+
+    base: event_base_new()返回值
+    fd: 绑定的event文件描述符
+    options: BEV_OPT_CLOSE_ON_FREE
+
+    返回值: 成功创建的bufferevent事件对象
+    
+
+
+将事件添加到base：
+    int event_add(struct event *ev, const struct timeval *tv);
+
+    ev: event_new()返回值
+    tv: NULL 超时时间
+
+
+释放事件：
+    int event_free(struct event *ev)
+    ev: event_new()返回值
+
+    void bufferevent_socket_free(struct bufferevent* ev)
+
+
+未决：有资格被才处理，但还没有被处理
+非未决：没有资格被处理
+
+新事件 -> event_add -> 未决态 -> event_base_dispatch && 事件触发 -> 激活态 -> callback -> 被处理 -> 非未决
+
+
+bufferevent
+有两个缓冲区，只能读一次，fifo
+读缓冲：有数据，读回调函数，bufferevent_read()
+写缓冲：bufferevent_write()，一旦有数据，就会自动刷新--发送给对端，发送成功。写回调函数被调用，通知写数据完成
+
+创建事件
+    struct event *bufferevent_socket_new(struct event_base *base, evutil_socket_t fd, short what, enum bufferevent_options options)
+
+    base: event_base_new()返回值
+    fd: 绑定的event文件描述符
+    options: BEV_OPT_CLOSE_ON_FREE
+
+    返回值: 成功创建的bufferevent事件对象
+
+
+给bufferevent设置回调
+    void bufferevent_setcb(struct bufferevent* bufev, 
+                            bufferevent_data_cb readcb, 
+                            bufferevent_data_cb writecb,
+                            bufferevent_event_cb eventcb,
+                            void* cbarg);
+
+    bufev: bufferevent_socket_new返回值
+    readcb: 设置读缓冲，对应回调read_cb
+    writecb: 设置写缓冲，对应回调write_cb -- 给调用者，发送写成功通知，可以NULL
+    eventcb: 是指事件回调，也可以传NULL
+    cbarg: 回调函数的参数
+
+
+启动、关闭bufferevent的缓冲区
+    void bufferevent_enable(struct bufferevent *bufev, short events)
+
+    events: EV_READ EV_WRITE EV_READ|EV_WRITE
+    默认write是enable，read是disable
+        bufferevent_enable(ev, EV_READ);
+
+
+客户端连接服务器
+    socket connect
+    int bufferevent_socket_connect(struct bufferevent *bufev, struct scokaddr *address, int addrlen)
+
+    bufev: bufferevent事件对象
+    address,addrlen: 等同connect 参数 2/3
+
+
+服务器创建监听器
+    socket bind listen accept
+    struct evconnlistener *evconnlistener_new_bind(
+        struct event_base* base,
+        evconnlistener_cb cb,
+        void *ptr,
+        unsigned flags,
+        int backlog,
+        const struct sockaddr *sa,
+        int socklen
+    )
+
+    base: event_base
+    cb: 回调函数
+    ptr: 回调函数的参数
+    flags: LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE
+    backlog: listen 参数2 -1表最大值
+    sa: 服务器地址结构
+    socklen: 服务器地址长度
+    返回值：成功创建的监听器
+
+
+回调函数类型
+    typedef void(*evconnlistener_cb)(
+        struct evconnlistener *listener,
+        evutil_socket_t sock,
+        struct sockaddr* addr,
+        int len,
+        void* ptr
+    )
+
+    listener: evconnlistener_new_bind返回值
+    addr: 客户端的IP+端口
+    len: addr的len
+    prt: 外部ptr传递进来的值
+    客户端成功连接，回调被调用

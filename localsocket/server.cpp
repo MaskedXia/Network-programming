@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#define UNIXSTR_PATH "/tmp/unix.str"
+#define UNIXSTR_PATH "/tmp/unix.str"  // 创建socket文件
 #define LISTENQ 5
 #define BUFFER_SIZE 256
 

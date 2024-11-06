@@ -1,6 +1,7 @@
 IPC: pipe、fifo、mmap、信号、本地套（domain）  --CS模型
 
 本地套接字
+（局域网不行，比pipe更有优势，全双工）
 Socket 同样可以用于本地通信。
 创建套接字时使用本地协议 AF_LOCAL。
 分为流式套接字（SOCK_STREAM）和数据报套接字（SOCK_DGRAM） 。
