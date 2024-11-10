@@ -1,0 +1,33 @@
+HTTP协议
+
+请求行
+请求头
+空行
+请求数据
+
+HTTP请求方法
+    GET
+    POST
+    ...
+
+请求：
+    GET /hello.c HTTP/1.1\r\n
+    HOST:localhost\r\n
+    User-Agent:..\r\n
+    Accept:..\r\n
+    Connection:keep-alive\r\n
+    (空行)\r\n
+
+应答：
+    HTTP/1.1 200 OK\r\n
+    Server:..\r\n
+    Date:..\r\n
+    Content_type:text/plain..\r\n
+    Connent-Length:..\r\n
+    Connection:close\r\n
+    (空行)\r\n
+    #include <stdio.h>\r\n
+    ...
+
+
+
